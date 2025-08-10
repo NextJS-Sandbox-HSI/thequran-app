@@ -1,3 +1,5 @@
+import EquranSurat from '@/app/_ui/EquranSurat';
+
 export default async function Page({
   params,
 }: {
@@ -12,6 +14,9 @@ export default async function Page({
   const json = await res.json()
  
   return (
-    <pre>{JSON.stringify(json.data, null, 2)}</pre>
+    <EquranSurat 
+      surahData={json.data}
+      selectedReciter="03"
+    />
   );
 }

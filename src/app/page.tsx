@@ -1,4 +1,4 @@
-import EquranApp from "./_ui/EquranApp";
+import EquranIndex from "./_ui/EquranIndex";
 
 export default async function Page() {
   const res = await fetch("https://equran.id/api/v2/surat", {
@@ -8,6 +8,6 @@ export default async function Page() {
   const json = await res.json();
 
   return (
-    <EquranApp surahs={json.data} />
+    <EquranIndex surahs={json.data} />
   );
 }

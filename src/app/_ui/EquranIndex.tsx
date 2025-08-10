@@ -1,6 +1,8 @@
 'use client'
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, Play, Pause, Volume2, ChevronRight, Book, MapPin, Hash } from 'lucide-react';
+import { Moon, Sun, Play, Pause, Volume2, ChevronRight, Book, MapPin, Hash, Search } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function EquranApp({ surahs }: { surahs: Surah[] }) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -8,6 +10,8 @@ export default function EquranApp({ surahs }: { surahs: Surah[] }) {
   const [currentAudio, setCurrentAudio] = useState<CurrentAudio | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [selectedReciter, setSelectedReciter] = useState<string>('01');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const router = useRouter();
 
 type Reciter = { id: string; name: string };
 
@@ -69,6 +73,22 @@ const reciters: Record<string, Reciter> = {
     return currentAudio?.surah === surahNumber && isPlaying;
   };
 
+  // Filter surahs based on search query
+  const filteredSurahs = surahs.filter((surah) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      surah.namaLatin.toLowerCase().includes(query) ||
+      surah.arti.toLowerCase().includes(query) ||
+      surah.nomor.toString().includes(query)
+    );
+  });
+
+  const clearSearch = (): void => {
+    setSearchQuery('');
+  };
+
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
       darkMode 
@@ -113,9 +133,58 @@ const reciters: Record<string, Reciter> = {
         </div>
       </div>
 
-      {/* Reciter Selection */}
+      {/* Search Bar */}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className={`p-4 rounded-2xl mb-6 ${
+        <div className={`relative mb-6 ${
+          darkMode 
+            ? 'bg-slate-800/50 border-slate-700' 
+            : 'bg-white border-slate-200'
+        } border rounded-2xl backdrop-blur-sm shadow-lg`}>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className={`h-5 w-5 ${
+                darkMode ? 'text-slate-400' : 'text-slate-500'
+              }`} />
+            </div>
+            <input
+              type="text"
+              placeholder="Search surah by name or meaning... (e.g., 'Al-Fatihah', 'Pembukaan')"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={`w-full pl-12 pr-12 py-4 rounded-2xl transition-all duration-200 ${
+                darkMode 
+                  ? 'bg-transparent text-white placeholder-slate-400 focus:bg-slate-700/50' 
+                  : 'bg-transparent text-slate-900 placeholder-slate-500 focus:bg-slate-50'
+              } focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500`}
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className={`absolute inset-y-0 right-0 pr-4 flex items-center ${
+                  darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-700'
+                } transition-colors`}
+              >
+                <span className="text-sm font-medium">Clear</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Search Results Info */}
+        {searchQuery && (
+          <div className={`mb-4 text-sm ${
+            darkMode ? 'text-slate-400' : 'text-slate-600'
+          }`}>
+            {filteredSurahs.length > 0 ? (
+              <p>Found {filteredSurahs.length} surah{filteredSurahs.length !== 1 ? 's' : ''} matching "{searchQuery}"</p>
+            ) : (
+              <p>No surahs found matching "{searchQuery}". Try searching by surah name or meaning.</p>
+            )}
+          </div>
+        )}
+
+      {/* Reciter Selection */}
+      <div className={`p-4 rounded-2xl mb-6 ${
           darkMode 
             ? 'bg-slate-800/50 border-slate-700' 
             : 'bg-white border-slate-200'
@@ -142,8 +211,10 @@ const reciters: Record<string, Reciter> = {
 
         {/* Surah List */}
         <div className="space-y-4">
-          {surahs.map((surah) => (
+          {filteredSurahs.length > 0 ? (
+            filteredSurahs.map((surah) => (
             <div
+              onClick={() => router.push('/surat/' + surah.nomor)}
               key={surah.nomor}
               className={`group p-6 rounded-2xl transition-all duration-300 border ${
                 darkMode 
@@ -226,9 +297,32 @@ const reciters: Record<string, Reciter> = {
                 darkMode ? 'border-slate-700 text-slate-400' : 'border-slate-200 text-slate-600'
               }`} dangerouslySetInnerHTML={{ __html: surah.deskripsi }} />
             </div>
-          ))}
+          ))
+          ) : searchQuery ? (
+            <div className={`text-center py-12 ${
+              darkMode ? 'text-slate-400' : 'text-slate-500'
+            }`}>
+              <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium mb-2">No results found</h3>
+              <p className="text-sm">
+                Try searching with different keywords like surah names (Al-Fatihah, Al-Baqarah) 
+                or meanings (Pembukaan, Sapi).
+              </p>
+              <button
+                onClick={clearSearch}
+                className={`mt-4 px-4 py-2 rounded-lg transition-colors ${
+                  darkMode 
+                    ? 'bg-slate-700 hover:bg-slate-600 text-white' 
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+              >
+                Clear search
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
+      
 
       {/* Audio Player Notification */}
       {currentAudio && isPlaying && (
