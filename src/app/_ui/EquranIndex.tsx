@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, Play, Pause, Volume2, ChevronRight, Book, MapPin, Hash, Search } from 'lucide-react';
+import { Moon, Sun, Play, Pause, Volume2, BookOpen, Book, MapPin, Hash, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import TheQuranLogo from "./TheQuranLogo";
 
 export default function EquranApp({ surahs }: { surahs: Surah[] }) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -104,19 +106,7 @@ const reciters: Record<string, Reciter> = {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-xl ${
-                darkMode 
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600' 
-                  : 'bg-gradient-to-r from-emerald-500 to-teal-500'
-              } shadow-lg`}>
-                <Book className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">القرآن الكريم</h1>
-                <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Al-Quran Al-Kareem
-                </p>
-              </div>
+              <TheQuranLogo />
             </div>
             
             <button
@@ -214,7 +204,6 @@ const reciters: Record<string, Reciter> = {
           {filteredSurahs.length > 0 ? (
             filteredSurahs.map((surah) => (
             <div
-              onClick={() => router.push('/surat/' + surah.nomor)}
               key={surah.nomor}
               className={`group p-6 rounded-2xl transition-all duration-300 border ${
                 darkMode 
@@ -286,9 +275,17 @@ const reciters: Record<string, Reciter> = {
                       <Play className="h-5 w-5" />
                     )}
                   </button>
-                  <ChevronRight className={`h-5 w-5 transition-transform duration-200 group-hover:translate-x-1 ${
-                    darkMode ? 'text-slate-500' : 'text-slate-400'
-                  }`} />
+                  <Link
+                    href={`/surat/${surah.nomor}`}
+                    aria-label={`Lihat detail Surah ${surah.namaLatin}`}
+                    className={`p-3 rounded-xl transition-colors duration-300 text-sm font-medium ${
+                    darkMode
+                    ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    } shadow-md hover:shadow-lg`}
+                    >
+                    <BookOpen className="h-5 w-5" />
+                  </Link>
                 </div>
               </div>
 
