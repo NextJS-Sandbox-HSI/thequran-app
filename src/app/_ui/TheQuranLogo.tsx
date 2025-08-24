@@ -59,7 +59,7 @@ export default function TheQuranLogo({ width = 200, height = 60 }) {
         fill="#94a3b8"
         opacity="0.8"
       >
-        Digital Quran Experience
+        Digital Quran Client App
       </text>
     </svg>
   );

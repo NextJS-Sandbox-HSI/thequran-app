@@ -1,14 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, Play, Pause, Volume2, BookOpen, Book, MapPin, Hash, Search } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Moon, Sun, Play, Pause, Volume2, BookOpen, MapPin, Hash, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import TheQuranLogo from "./TheQuranLogo";
+import { useTheme } from './ThemeContext';
+import { ThemeToggle } from './ThemeToggle';
 
-export default function EquranApp({ surahs }: { surahs: Surah[] }) {
+export default function EquranIndex({ surahs }: { surahs: Surah[] }) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const { darkMode } = useTheme();
   const [currentAudio, setCurrentAudio] = useState<CurrentAudio | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [selectedReciter, setSelectedReciter] = useState<string>('01');
@@ -24,32 +26,6 @@ const reciters: Record<string, Reciter> = {
   "04": { id: "Ibrahim-Al-Dossari", name: "Ibrahim Al-Dossari" },
   "05": { id: "Misyari-Rasyid-Al-Afasi", name: "Misyary Rashed Al-Afasy" }
 };
-
-  // Detect system theme preference on mount
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setDarkMode(mediaQuery.matches);
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setDarkMode(e.matches);
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  // Apply theme class to document
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
-
-  const toggleTheme = (): void => {
-    setDarkMode(!darkMode);
-  };
 
   const getAudioUrl = (reciterId: string, surahNumber: number) => {
   const paddedNumber = String(surahNumber).padStart(3, "0");
@@ -109,16 +85,7 @@ const reciters: Record<string, Reciter> = {
               <TheQuranLogo />
             </div>
             
-            <button
-              onClick={toggleTheme}
-              className={`p-3 rounded-xl transition-all duration-300 ${
-                darkMode 
-                  ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400' 
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              } shadow-md hover:shadow-lg`}
-            >
-              {darkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
+            <ThemeToggle/>
           </div>
         </div>
       </div>
